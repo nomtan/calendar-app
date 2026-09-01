@@ -296,3 +296,19 @@ However, every backend feature introduced before the web release must satisfy:
 - entitlements represented on the backend rather than only inside App Store / Play Store clients
 
 This keeps the cost of adding the web client primarily in the presentation layer.
+
+
+## 8. Shared calendar implementation status
+
+The mock implementation now includes:
+- multiple calendars
+- calendar creation
+- selected calendar state
+- event-to-calendar relation
+- member lists and roles
+- member removal
+- invitation link/code flow
+
+This is intentionally implemented before D1 so the UI/domain boundaries can be validated first.
+
+See `docs/shared-calendars.md`.
