@@ -1,0 +1,10 @@
+{
+  "name": "calendar-app",
+  "private": true,
+  "packageManager": "pnpm@10.17.1",
+  "scripts": {
+    "mobile": "pnpm --filter @calendar/mobile start",
+    "mobile:ios": "pnpm --filter @calendar/mobile ios",
+    "mobile:android": "pnpm --filter @calendar/mobile android"
+  }
+}
