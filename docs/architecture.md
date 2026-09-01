@@ -173,6 +173,7 @@ events
 event_recurrences
 event_labels
 event_participants
+event_activity_logs
 
 notification_preferences
 device_push_tokens
@@ -414,3 +415,68 @@ calendar-app/
 ```
 
 A monorepo is recommended because mobile, web, and API should share TypeScript schemas, API contracts, and domain logic while keeping their presentation layers independent.
+
+
+## 19. Event activity log architecture
+
+Event history must be implemented as an append-only activity stream separate from the current `events` rows.
+
+Recommended table:
+
+```
+event_activity_logs
+- id
+- calendar_id
+- event_id
+- action
+- actor_user_id
+- occurred_at
+- changed_fields_json
+- before_json
+- after_json
+```
+
+Important principles:
+- activity rows are appended, not rewritten for ordinary event edits
+- deleting an event does not delete its activity history
+- log creation occurs in the same backend operation as the event mutation
+- clients must never be trusted to submit authoritative audit metadata such as actor id or timestamp
+- actor id comes from the authenticated server session
+- timestamp is generated server-side
+- API authorization verifies membership of the associated calendar
+
+Suggested API endpoints:
+
+```
+GET /api/calendars/:calendarId/activity
+GET /api/events/:eventId/activity
+```
+
+Pagination should be cursor-based for activity feeds.
+
+Example:
+```
+GET /api/calendars/:calendarId/activity?cursor=...&limit=50
+```
+
+For updates, store only meaningful changes rather than full snapshots when possible.
+
+Example:
+
+```json
+{
+  "changedFields": ["startAt", "endAt"],
+  "before": {
+    "startAt": "2026-09-01T10:00:00+09:00"
+  },
+  "after": {
+    "startAt": "2026-09-01T11:00:00+09:00"
+  }
+}
+```
+
+Sensitive fields should be reviewed before storing historical snapshots.
+
+For deletions, retain enough snapshot data to render a useful history entry even after the event row is removed.
+
+If soft-delete is introduced later, the activity-log design remains valid.
