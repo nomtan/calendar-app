@@ -43,6 +43,7 @@ Web support is not part of the initial MVP.
 Required:
 - Google account login
 - email address + password login
+- Sign in with Apple (iOS release requirement alongside Google login)
 - logout
 - persistent login session
 - account deletion
@@ -54,11 +55,9 @@ Candidate implementation:
 - Expo SecureStore for secure native session persistence
 
 Future candidates:
-- Apple Sign In
 - password reset
 - email verification
 
-Apple Sign In should be evaluated before App Store release depending on Apple review requirements.
 
 ## 5. Calendar model
 
@@ -251,6 +250,7 @@ Avoid aggressive interstitial advertising because schedule entry is a high-frequ
 - onboarding
 - Google authentication
 - email/password authentication
+- Sign in with Apple
 - account management
 - month calendar
 - event CRUD
