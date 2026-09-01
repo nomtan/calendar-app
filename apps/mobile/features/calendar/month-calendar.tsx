@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Button } from 'heroui-native';
 
+import { useCalendars } from '@/features/calendars/calendars-context';
 import { CalendarEvent, useEvents } from '@/features/calendar/events-context';
 import { EventEditorModal } from '@/features/calendar/event-editor-modal';
 
@@ -17,6 +18,7 @@ const eventStyle: Record<CalendarEvent['color'], { backgroundColor: string; colo
 
 export function MonthCalendar() {
   const { events } = useEvents();
+  const { selectedCalendar, selectedCalendarId } = useCalendars();
   const initial = useMemo(() => new Date(), []);
   const [month, setMonth] = useState(new Date(initial.getFullYear(), initial.getMonth(), 1));
   const [editor, setEditor] = useState<{ visible: boolean; date: string; event?: CalendarEvent | null }>({ visible: false, date: '', event: null });
@@ -38,7 +40,7 @@ export function MonthCalendar() {
         <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary"><Text className="text-xl text-foreground">≡</Text></Pressable>
         <View className="flex-row items-center gap-2">
           <Pressable onPress={() => setMonth(new Date(year, monthIndex - 1, 1))} className="px-2 py-2"><Text className="text-lg text-muted-foreground">‹</Text></Pressable>
-          <Pressable onPress={() => { const now = new Date(); setMonth(new Date(now.getFullYear(), now.getMonth(), 1)); }}><Text className="text-lg font-semibold text-foreground">{year}年{monthIndex + 1}月</Text></Pressable>
+          <Pressable onPress={() => { const now = new Date(); setMonth(new Date(now.getFullYear(), now.getMonth(), 1)); }}><View className="items-center"><Text className="text-lg font-semibold text-foreground">{year}年{monthIndex + 1}月</Text><Text className="text-[10px] text-muted-foreground">{selectedCalendar.emoji} {selectedCalendar.name}</Text></View></Pressable>
           <Pressable onPress={() => setMonth(new Date(year, monthIndex + 1, 1))} className="px-2 py-2"><Text className="text-lg text-muted-foreground">›</Text></Pressable>
         </View>
         <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary" onPress={() => { const now = new Date(); openNew(now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())); }}><Text className="text-2xl text-accent">＋</Text></Pressable>
@@ -57,7 +59,7 @@ export function MonthCalendar() {
           <View key={week} className="flex-1 flex-row">
             {cells.slice(week * 7, week * 7 + 7).map((day, column) => {
               const key = day ? dateKey(day) : 'blank-' + week + '-' + column;
-              const dayEvents = day ? events.filter((event) => event.date === dateKey(day)) : [];
+              const dayEvents = day ? events.filter((event) => event.calendarId === selectedCalendarId && event.date === dateKey(day)) : [];
               return (
                 <Pressable key={key} disabled={!day} onPress={() => day && openNew(dateKey(day))} className="flex-1 border-b border-r border-border/70 bg-background px-1 pb-1 pt-1">
                   {day ? (
