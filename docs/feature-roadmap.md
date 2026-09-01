@@ -181,20 +181,26 @@ High.
 
 ---
 
-### H. Calendar history / change clarity
+### H. Calendar activity / event history
 
-For a shared event, show simple change history:
-- who created it
-- who changed date/time
-- when it changed
+Provide a lightweight activity feed showing:
+- who created an event
+- who edited an event
+- what important fields changed
+- who deleted an event
+- when each action occurred
 
-Do not build a complex audit system.
+Two entry points:
+- calendar-wide activity feed
+- per-event history
+
+The backend should start recording these logs before the UI feature ships, so historical data is available when the feature is enabled.
 
 Complexity:
 Medium.
 
 Recommendation:
-Medium.
+High after MVP.
 
 ## 4. Recommended differentiation set for V1
 
@@ -250,7 +256,14 @@ They are useful without requiring AI or expensive backend processing.
 - reuse domain/API/query packages
 - desktop-oriented calendar UX
 
-### Milestone 6 - polish
+### Milestone 6 - collaboration history
+- calendar activity feed
+- per-event history
+- created / updated / deleted entries
+- important field change summaries
+- pagination and retention rules
+
+### Milestone 7 - polish
 - search
 - memo/checklist
 - event comments
