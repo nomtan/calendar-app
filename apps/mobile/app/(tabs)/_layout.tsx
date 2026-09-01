@@ -1,5 +1,7 @@
-import { Tabs } from 'expo-router';
+import { Redirect, Tabs } from 'expo-router';
 import { Text } from 'react-native';
+
+import { useAuth } from '@/features/auth/auth-context';
 
 const icon = (symbol: string) =>
   function TabIcon({ color }: { color: string }) {
@@ -7,6 +9,10 @@ const icon = (symbol: string) =>
   };
 
 export default function TabsLayout() {
+  const { isAuthenticated, isLoading } = useAuth();
+  if (isLoading) return null;
+  if (!isAuthenticated) return <Redirect href="/(auth)/sign-in" />;
+
   return (
     <Tabs
       screenOptions={{

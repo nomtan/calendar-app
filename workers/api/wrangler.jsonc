@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "calendar-app-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "AUTH_BASE_URL": "http://127.0.0.1:8787",
+    "APP_ORIGIN": "http://localhost:8081"
+  }
+  // D1 binding will be added later:
+  // "d1_databases": [
+  //   { "binding": "DB", "database_name": "calendar-app", "database_id": "..." }
+  // ]
+}

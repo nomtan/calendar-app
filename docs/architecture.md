@@ -148,6 +148,7 @@ Recommended:
 
 Initial providers:
 - Google
+- Apple
 - email/password
 
 Session validation occurs on the backend for protected requests.
@@ -480,3 +481,27 @@ Sensitive fields should be reviewed before storing historical snapshots.
 For deletions, retain enough snapshot data to render a useful history entry even after the event row is removed.
 
 If soft-delete is introduced later, the activity-log design remains valid.
+
+
+## 20. Authentication implementation status
+
+Authentication foundation is implemented with two client modes:
+- mock: no backend required during UI development
+- remote: Better Auth through the Cloudflare Worker
+
+Mobile:
+- Better Auth Expo client
+- SecureStore session/cookie persistence
+- sign-in and sign-up route group
+- protected tab routes
+- Google / Apple / email-password entry points
+
+Backend:
+- Better Auth hosted in Cloudflare Workers
+- D1 binding passed directly to Better Auth
+- Hono route mounts Better Auth under `/api/auth/*`
+- authenticated `/api/me` example endpoint
+
+Cloudflare account resources, D1 binding, OAuth credentials, and production secrets remain deployment-time configuration.
+
+See `docs/authentication.md`.
