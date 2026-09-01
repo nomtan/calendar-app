@@ -28,15 +28,31 @@ Initial product design should optimize for approximately 1-10 people per shared 
 
 ## 3. Platforms
 
+Target platforms:
 - iOS
 - Android
+- Web
 
-Technology:
+Priority:
+- iOS / Android are the initial primary release targets.
+- Web is not required for the first MVP, but all product/domain/API design must support a later web release without backend redesign.
+
+Mobile technology:
 - React Native
 - Expo
+- Expo Router
 - HeroUI Native
 
-Web support is not part of the initial MVP.
+Web technology:
+- React
+- HeroUI React
+- Cloudflare-based hosting
+- Web routing/build framework will be selected during web implementation.
+
+Important:
+- Do not assume HeroUI Native components will be reused directly on web.
+- Share domain logic, API clients, validation schemas, types, authentication contracts, and feature rules across platforms.
+- Keep platform UI components separate where appropriate.
 
 ## 4. Authentication
 
@@ -282,15 +298,16 @@ Avoid aggressive interstitial advertising because schedule entry is a high-frequ
 - advanced permissions
 - export/backup
 
-### Out of initial scope
+### Out of initial MVP scope
 - public calendars
 - hundreds of members per calendar
 - full social/chat system
 - album
 - stickers
 - AI features
-- web application
 - enterprise/groupware features
+
+Web application is planned after the initial mobile MVP and is therefore not considered permanently out of scope.
 
 ## 17. Product principles
 
@@ -300,3 +317,43 @@ Avoid aggressive interstitial advertising because schedule entry is a high-frequ
 4. Ads must not interrupt event entry.
 5. The app remains useful without a subscription.
 6. Shared/private data boundaries must be explicit.
+
+
+## 18. Cross-platform product requirements
+
+The backend API and database model must be platform-neutral.
+
+All core calendar functionality should eventually be available on:
+- iOS
+- Android
+- Web
+
+Core functionality includes:
+- authentication
+- calendars
+- events
+- sharing
+- invitations
+- labels
+- recurrence
+- comments/checklists when implemented
+- search
+- billing entitlement state
+
+Platform-specific functionality may differ:
+- native push notifications
+- app-store purchases
+- mobile widgets
+- web browser notifications
+- web keyboard shortcuts
+- responsive desktop layouts
+
+URLs and invitation links should use a web-first canonical URL that can also deep-link into the native application when installed.
+
+Example:
+```
+https://calendar.example.com/invite/:token
+https://calendar.example.com/event/:eventId
+```
+
+This enables the same shared link to work from desktop browsers, mobile browsers, and installed native applications.
