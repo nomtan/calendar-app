@@ -5,10 +5,14 @@ Last updated: 2026-09-01
 ## 1. Architecture overview
 
 ```
-React Native / Expo
-       |
-       | HTTPS
-       v
+Mobile App                    Web App
+React Native / Expo           React + HeroUI React
+HeroUI Native                       |
+       \                            /
+        \          HTTPS           /
+         +-------------------------+
+                    |
+                    v
 Cloudflare Workers API
        |
        +-- Better Auth
@@ -30,7 +34,34 @@ Additional services:
 - advertising SDK: monetization
 ```
 
-## 2. Mobile frontend
+## 2. Frontend strategy
+
+Use a multi-app monorepo rather than forcing one UI implementation onto every platform.
+
+Shared across mobile and web:
+- domain models
+- TypeScript types
+- API client
+- authentication contracts
+- validation schemas
+- TanStack Query keys/hooks where platform-neutral
+- recurrence logic
+- permissions/business rules
+- date utilities
+
+Platform-specific:
+- screens/layout
+- UI components
+- navigation shell
+- storage implementation
+- advertising SDK
+- billing implementation
+- notifications
+
+Reason:
+HeroUI Native currently targets iOS/Android and is not recommended by HeroUI for web. The web app should use HeroUI React instead.
+
+## 3. Mobile frontend
 
 Recommended:
 - React Native
@@ -47,7 +78,42 @@ Local persistence:
 - Expo SecureStore: authentication/session secrets
 - AsyncStorage: non-sensitive UI preferences
 
-## 3. Backend
+## 4. Web frontend
+
+Web is a planned platform, although it does not need to ship in the first MVP.
+
+Recommended direction:
+- React
+- TypeScript
+- HeroUI React
+- TanStack Query
+- shared API/domain packages from the monorepo
+- responsive layout for phone, tablet, and desktop browsers
+
+Hosting:
+- Cloudflare should remain the preferred hosting platform.
+- Static assets can be served from Cloudflare.
+- The application communicates with the same Workers API used by native clients.
+
+Do not duplicate calendar business logic in the web app.
+
+The web application should consume the same API contracts as mobile.
+
+Authentication on web:
+- cookie-based/session-based browser authentication where supported by the auth architecture
+- Google
+- email/password
+- Apple where appropriate
+
+Web-specific UX can take advantage of:
+- larger month/week layouts
+- keyboard shortcuts
+- hover/context menus
+- drag-and-drop event editing later
+
+Expo Router itself supports web output, including static/server-oriented modes, but the current architecture intentionally avoids depending on HeroUI Native for the web UI.
+
+## 5. Backend
 
 Cloudflare Workers provides the API layer.
 
@@ -72,7 +138,7 @@ Initial API namespaces:
 /api/billing/*
 ```
 
-## 4. Authentication
+## 6. Authentication
 
 Recommended:
 - Better Auth running on Cloudflare Workers
@@ -88,7 +154,7 @@ Session validation occurs on the backend for protected requests.
 
 Do not store provider secrets or long-lived access tokens in AsyncStorage.
 
-## 5. Database
+## 7. Database
 
 Cloudflare D1 is the primary relational datastore.
 
@@ -123,7 +189,7 @@ attachments
 audit_logs
 ```
 
-## 6. Core relationships
+## 8. Core relationships
 
 ```
 User
@@ -143,7 +209,7 @@ Every event belongs to exactly one calendar.
 
 Authorization must always verify calendar membership server-side.
 
-## 7. API design
+## 9. API design
 
 REST is recommended for the initial release.
 
@@ -174,7 +240,7 @@ Example:
 GET /api/calendars/:id/events?from=2026-09-01&to=2026-10-31
 ```
 
-## 8. Synchronization
+## 10. Synchronization
 
 MVP uses request-based synchronization:
 - fetch visible date range
@@ -188,7 +254,7 @@ Real-time WebSocket synchronization is not required for MVP.
 Possible later upgrade:
 - Durable Objects / WebSocket for real-time collaborative updates
 
-## 9. Recurring events
+## 11. Recurring events
 
 Do not create unlimited future event rows.
 
@@ -201,7 +267,7 @@ The API expands occurrences only for the requested date range.
 
 This avoids huge D1 tables for long-running recurring schedules.
 
-## 10. Invitation model
+## 12. Invitation model
 
 Shared-calendar invitation:
 - random single-purpose token
@@ -219,7 +285,7 @@ Flow:
 
 Never expose calendar membership solely based on knowing calendar ID.
 
-## 11. Push notification architecture
+## 13. Push notification architecture
 
 The application registers native device push tokens.
 
@@ -238,7 +304,7 @@ Event mutation
 
 Push payload should contain identifiers, not sensitive event details when possible.
 
-## 12. Billing
+## 14. Billing
 
 The native stores remain the source of truth for purchases.
 
@@ -255,7 +321,7 @@ Subscription implementation library/service is still undecided.
 
 Candidates should be evaluated before implementation.
 
-## 13. Advertising
+## 15. Advertising
 
 Advertising SDK is intentionally abstracted from calendar UI.
 
@@ -270,7 +336,7 @@ AdProvider
 
 Paid entitlement disables rendering before requesting an ad.
 
-## 14. Security requirements
+## 16. Security requirements
 
 - server-side authorization on every calendar/event mutation
 - calendar membership checked for every calendar-scoped read
@@ -280,7 +346,39 @@ Paid entitlement disables rendering before requesting an ad.
 - rate limit authentication and invitation endpoints
 - account deletion deletes or anonymizes owned personal data according to policy
 
-## 15. Suggested repository structure
+## 17. Cross-platform boundaries
+
+Code sharing should follow this rule:
+
+```
+share behavior, not presentation
+```
+
+Good shared code:
+- Event / Calendar domain types
+- Zod or equivalent schemas
+- REST client
+- query hooks
+- recurrence calculations
+- authorization/role constants
+- date range calculations
+- feature flags
+- entitlement rules
+
+Usually platform-specific:
+- HeroUI components
+- modal implementations
+- native tabs vs desktop navigation
+- SecureStore vs browser storage/cookies
+- push notification registration
+- advertisements
+- in-app purchases
+
+Avoid imports from `apps/mobile` inside `apps/web` and vice versa.
+
+Both applications should depend downward on shared packages.
+
+## 18. Suggested repository structure
 
 ```
 calendar-app/
@@ -290,8 +388,17 @@ calendar-app/
       components/
       features/
       lib/
+    web/
+      src/
+        components/
+        features/
+        routes/
+        lib/
   packages/
+    api-client/
     api-types/
+    domain/
+    validation/
     shared/
   workers/
     api/
@@ -306,4 +413,4 @@ calendar-app/
     feature-roadmap.md
 ```
 
-A monorepo is recommended because mobile/API can share TypeScript schemas and domain types.
+A monorepo is recommended because mobile, web, and API should share TypeScript schemas, API contracts, and domain logic while keeping their presentation layers independent.
