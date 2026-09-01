@@ -7,7 +7,7 @@ export function createAuth(env: Env) {
   return betterAuth({
     database: env.DB,
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.APP_ORIGIN,
+    baseURL: env.AUTH_BASE_URL,
     trustedOrigins: [
       'calendarapp://',
       'calendarapp://*',
