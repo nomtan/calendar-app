@@ -50,3 +50,28 @@ Not included yet:
 - billing / advertising
 
 Backend integration should later replace the local data source without redesigning the screen components.
+
+
+## Authentication development
+
+Authentication is scaffolded before Cloudflare infrastructure is required.
+
+Default:
+
+```bash
+cp apps/mobile/.env.example apps/mobile/.env
+pnpm mobile
+```
+
+The default `EXPO_PUBLIC_AUTH_MODE=mock` allows the login/sign-up UI to be tested without Workers or D1.
+
+Later, after the API Worker and D1 are configured:
+
+```
+EXPO_PUBLIC_AUTH_MODE=remote
+EXPO_PUBLIC_AUTH_BASE_URL=https://your-api-domain.example
+```
+
+Worker local development will use `workers/api/.dev.vars` based on `.dev.vars.example`.
+
+See `docs/authentication.md` for the remaining Cloudflare/OAuth setup.
