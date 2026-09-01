@@ -282,6 +282,7 @@ Avoid aggressive interstitial advertising because schedule entry is a high-frequ
 - remove-ads purchase
 
 ### P1 - highly useful
+- event activity/history log
 - memo/checklist
 - event comments
 - event search
@@ -357,3 +358,53 @@ https://calendar.example.com/event/:eventId
 ```
 
 This enables the same shared link to work from desktop browsers, mobile browsers, and installed native applications.
+
+
+## 19. Event activity / history log
+
+A calendar should provide a history view showing changes made to events.
+
+This is not required for the initial MVP, but the backend must record enough data from the beginning so the feature can be added later without losing historical information.
+
+Supported activity types:
+- event created
+- event updated
+- event deleted
+- event restored (future)
+- event moved to another date/time
+- participant/person assignment changed
+- status changed (confirmed / tentative / undecided)
+- checklist/action state changed when those features exist
+
+Each activity record should contain:
+- calendar id
+- event id or original event identifier
+- action type
+- actor user id
+- actor display name snapshot where useful
+- occurred at timestamp
+- before/after summary for relevant changed fields
+
+Example UI:
+
+```
+Today
+
+08:42  Ken created "Dentist"
+09:10  Yuki changed "Dentist"
+       10:00 -> 11:00
+10:05  Ken deleted "School meeting"
+```
+
+History scopes:
+- calendar activity feed
+- individual event history
+
+Permissions:
+- only members of the calendar can view its activity history
+- deleted events must not become visible to users who were never authorized to access the calendar
+
+Retention:
+- exact retention period will be decided later
+- initial architecture should support long-term retention
+- deletion of a user account must follow the privacy/account-deletion policy while preserving calendar integrity where legally appropriate
