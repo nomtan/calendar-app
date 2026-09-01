@@ -241,7 +241,16 @@ They are useful without requiring AI or expensive backend processing.
 - remove-ads entitlement
 - store purchase validation
 
-### Milestone 5 - polish
+### Milestone 5 - web application
+- responsive web shell
+- shared authentication
+- month calendar
+- event CRUD
+- shared calendars and invitations
+- reuse domain/API/query packages
+- desktop-oriented calendar UX
+
+### Milestone 6 - polish
 - search
 - memo/checklist
 - event comments
@@ -256,8 +265,21 @@ They are useful without requiring AI or expensive backend processing.
 - albums
 - arbitrary file storage
 - full chat
-- web application
 - external calendar synchronization
 - real-time websocket collaboration
 
 These can be reconsidered after usage data exists.
+
+
+## 7. Web rollout principle
+
+Web does not have to block the native MVP.
+
+However, every backend feature introduced before the web release must satisfy:
+- no native-only assumptions in database records
+- no native-only authentication requirement
+- REST/API contract available to browser clients
+- canonical HTTPS links for invitations and shared resources
+- entitlements represented on the backend rather than only inside App Store / Play Store clients
+
+This keeps the cost of adding the web client primarily in the presentation layer.
