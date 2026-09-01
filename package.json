@@ -5,6 +5,8 @@
   "scripts": {
     "mobile": "pnpm --filter @calendar/mobile start",
     "mobile:ios": "pnpm --filter @calendar/mobile ios",
-    "mobile:android": "pnpm --filter @calendar/mobile android"
+    "mobile:android": "pnpm --filter @calendar/mobile android",
+    "api": "pnpm --filter @calendar/api dev",
+    "api:typecheck": "pnpm --filter @calendar/api typecheck"
   }
 }
