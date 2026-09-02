@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "wrangler dev",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "cf-types": "wrangler types"
   },
   "dependencies": {
     "@better-auth/expo": "^1.7.2",
@@ -12,7 +13,6 @@
     "hono": "^4.9.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260828.0",
     "typescript": "^5.9.0",
     "wrangler": "^4.35.0"
   }
