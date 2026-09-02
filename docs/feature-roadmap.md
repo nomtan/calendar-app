@@ -312,3 +312,21 @@ The mock implementation now includes:
 This is intentionally implemented before D1 so the UI/domain boundaries can be validated first.
 
 See `docs/shared-calendars.md`.
+
+
+## 9. Event enhancement implementation status
+
+Implemented in mock mode:
+- all-day
+- daily/weekly/monthly/yearly recurrence
+- event labels
+- person assignment
+- confirmed/tentative/undecided status
+- event-linked preparation checklist
+- need-action status
+
+Still pending:
+- recurrence exception records
+- edit scope for recurring events
+- backend persistence
+- event activity log UI
