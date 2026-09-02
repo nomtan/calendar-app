@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Modal, Pressable, Text, TextInput, View } from 'react-native';
 import { Button } from 'heroui-native';
 
+import { useCalendars } from '@/features/calendars/calendars-context';
 import { CalendarEvent, useEvents } from '@/features/calendar/events-context';
 
 type Props = { visible: boolean; date: string; event?: CalendarEvent | null; onClose: () => void };
@@ -10,6 +11,7 @@ const colorHex: Record<CalendarEvent['color'], string> = { blue: '#4C9AFF', pink
 
 export function EventEditorModal({ visible, date, event, onClose }: Props) {
   const { createEvent, updateEvent, deleteEvent } = useEvents();
+  const { selectedCalendarId } = useCalendars();
   const [title, setTitle] = useState('');
   const [eventDate, setEventDate] = useState(date);
   const [time, setTime] = useState('');
@@ -25,7 +27,7 @@ export function EventEditorModal({ visible, date, event, onClose }: Props) {
 
   const save = () => {
     if (!title.trim()) return;
-    const input = { title: title.trim(), date: eventDate, time: time.trim() || undefined, color };
+    const input = { title: title.trim(), calendarId: event?.calendarId ?? selectedCalendarId, date: eventDate, time: time.trim() || undefined, color };
     if (event) updateEvent(event.id, input); else createEvent(input);
     onClose();
   };
