@@ -1,12 +1,30 @@
 import { createContext, PropsWithChildren, useContext, useMemo, useState } from 'react';
 
+export type EventColor = 'blue' | 'pink' | 'green' | 'orange' | 'purple';
+export type EventStatus = 'confirmed' | 'tentative' | 'undecided';
+export type Recurrence = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+export type ActionType = 'none' | 'reservation' | 'payment' | 'preparation' | 'reply';
+
+export type ChecklistItem = {
+  id: string;
+  text: string;
+  done: boolean;
+};
+
 export type CalendarEvent = {
   id: string;
   title: string;
   date: string;
   calendarId: string;
   time?: string;
-  color: 'blue' | 'pink' | 'green' | 'orange' | 'purple';
+  allDay: boolean;
+  color: EventColor;
+  label?: string;
+  assigneeIds: string[];
+  status: EventStatus;
+  recurrence: Recurrence;
+  actionType: ActionType;
+  checklist: ChecklistItem[];
 };
 
 type EventInput = Omit<CalendarEvent, 'id'>;
@@ -24,14 +42,24 @@ const dateForDay = (day: number) => {
   return now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(day);
 };
 
+const base = {
+  allDay: false,
+  label: '',
+  assigneeIds: [] as string[],
+  status: 'confirmed' as EventStatus,
+  recurrence: 'none' as Recurrence,
+  actionType: 'none' as ActionType,
+  checklist: [] as ChecklistItem[],
+};
+
 const initialEvents: CalendarEvent[] = [
-  { id: '1', title: '歯医者', calendarId: 'family', date: dateForDay(3), time: '10:00', color: 'blue' },
-  { id: '2', title: 'ピアノレッスン', calendarId: 'family', date: dateForDay(4), time: '13:00', color: 'pink' },
-  { id: '3', title: '家族で買い物', calendarId: 'family', date: dateForDay(6), time: '16:00', color: 'green' },
-  { id: '4', title: '学校説明会', calendarId: 'personal', date: dateForDay(10), time: '10:00', color: 'purple' },
-  { id: '5', title: 'ランチ予約', calendarId: 'family', date: dateForDay(10), time: '12:30', color: 'orange' },
-  { id: '6', title: '習い事', calendarId: 'family', date: dateForDay(18), time: '17:00', color: 'pink' },
-  { id: '7', title: '家族イベント', calendarId: 'family', date: dateForDay(25), time: '11:00', color: 'green' },
+  { ...base, id: '1', title: '歯医者', calendarId: 'family', date: dateForDay(3), time: '10:00', color: 'blue', assigneeIds: ['mock-user'], actionType: 'reservation' },
+  { ...base, id: '2', title: 'ピアノレッスン', calendarId: 'family', date: dateForDay(4), time: '13:00', color: 'pink', assigneeIds: ['child-a'], recurrence: 'weekly' },
+  { ...base, id: '3', title: '家族で買い物', calendarId: 'family', date: dateForDay(6), time: '16:00', color: 'green', assigneeIds: ['mock-user', 'partner'], status: 'tentative' },
+  { ...base, id: '4', title: '学校説明会', calendarId: 'personal', date: dateForDay(10), time: '10:00', color: 'purple', label: '学校' },
+  { ...base, id: '5', title: 'ランチ予約', calendarId: 'family', date: dateForDay(10), time: '12:30', color: 'orange', actionType: 'reservation' },
+  { ...base, id: '6', title: '習い事', calendarId: 'family', date: dateForDay(18), time: '17:00', color: 'pink', recurrence: 'weekly' },
+  { ...base, id: '7', title: '家族イベント', calendarId: 'family', date: dateForDay(25), allDay: true, color: 'green', checklist: [{ id: 'c1', text: '持ち物確認', done: false }] },
 ];
 
 export function EventsProvider({ children }: PropsWithChildren) {
@@ -50,4 +78,18 @@ export function useEvents() {
   const context = useContext(EventsContext);
   if (!context) throw new Error('useEvents must be used inside EventsProvider');
   return context;
+}
+
+export function occursOnDate(event: CalendarEvent, targetDate: string) {
+  if (event.date === targetDate) return true;
+  if (event.recurrence === 'none') return false;
+
+  const start = new Date(event.date + 'T00:00:00');
+  const target = new Date(targetDate + 'T00:00:00');
+  if (target < start) return false;
+
+  if (event.recurrence === 'daily') return true;
+  if (event.recurrence === 'weekly') return start.getDay() === target.getDay();
+  if (event.recurrence === 'monthly') return start.getDate() === target.getDate();
+  return start.getMonth() === target.getMonth() && start.getDate() === target.getDate();
 }
