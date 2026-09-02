@@ -408,3 +408,36 @@ Retention:
 - exact retention period will be decided later
 - initial architecture should support long-term retention
 - deletion of a user account must follow the privacy/account-deletion policy while preserving calendar integrity where legally appropriate
+
+
+## 20. Event enhancement implementation status
+
+Implemented in the current mock/mobile phase:
+- all-day events
+- recurrence: none / daily / weekly / monthly / yearly
+- event labels
+- person assignment using calendar members
+- status: confirmed / tentative / undecided
+- lightweight action-needed flag:
+  - reservation
+  - payment
+  - preparation
+  - reply
+- event preparation checklist
+
+Monthly view:
+- recurring events are expanded for display in the visible month
+- tentative events are prefixed with a triangle marker
+- event names remain one line inside each date cell
+
+Today view:
+- shows all-day/time
+- shows tentative/undecided status
+- shows labels
+- shows action-needed state
+- shows checklist completion count
+
+Current limitation:
+- recurring-event edit scope (this occurrence / this and future / all) is not implemented yet
+- recurrence currently represents a simple repeating rule in mock data
+- advanced recurrence exceptions will be added when the backend event model is introduced

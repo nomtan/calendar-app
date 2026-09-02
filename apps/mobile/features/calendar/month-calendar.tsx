@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Button } from 'heroui-native';
 
 import { useCalendars } from '@/features/calendars/calendars-context';
-import { CalendarEvent, useEvents } from '@/features/calendar/events-context';
+import { CalendarEvent, occursOnDate, useEvents } from '@/features/calendar/events-context';
 import { EventEditorModal } from '@/features/calendar/event-editor-modal';
 
 const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
@@ -59,7 +59,7 @@ export function MonthCalendar() {
           <View key={week} className="flex-1 flex-row">
             {cells.slice(week * 7, week * 7 + 7).map((day, column) => {
               const key = day ? dateKey(day) : 'blank-' + week + '-' + column;
-              const dayEvents = day ? events.filter((event) => event.calendarId === selectedCalendarId && event.date === dateKey(day)) : [];
+              const dayEvents = day ? events.filter((event) => event.calendarId === selectedCalendarId && occursOnDate(event, dateKey(day))) : [];
               return (
                 <Pressable key={key} disabled={!day} onPress={() => day && openNew(dateKey(day))} className="flex-1 border-b border-r border-border/70 bg-background px-1 pb-1 pt-1">
                   {day ? (
@@ -70,7 +70,7 @@ export function MonthCalendar() {
                           const style = eventStyle[event.color];
                           return (
                             <Pressable key={event.id} onPress={() => setEditor({ visible: true, date: event.date, event })} style={{ backgroundColor: style.backgroundColor, borderRadius: 4, paddingHorizontal: 3, paddingVertical: 2 }}>
-                              <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: style.color, fontSize: 9, fontWeight: '600' }}>{event.title}</Text>
+                              <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: style.color, fontSize: 9, fontWeight: '600' }}>{event.status === 'tentative' ? '△ ' : event.status === 'undecided' ? '? ' : ''}{event.title}</Text>
                             </Pressable>
                           );
                         })}
