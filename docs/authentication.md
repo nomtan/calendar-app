@@ -1,6 +1,6 @@
 # Authentication
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
 ## Goal
 
@@ -103,13 +103,13 @@ Policy:
 - sender addresses and domains must be configured outside source control
 - delivery failures must not expose secrets or raw provider errors to clients
 
-Planned sender example:
+Configured sender:
 
 ```
-noreply@<application-domain>
+noreply@mail.nmtng.com
 ```
 
-Do not hard-code the final sender domain until the production domain is decided.
+The sender address is exposed to the Worker as the non-secret `EMAIL_FROM` variable. The `EMAIL` binding is restricted with `allowed_sender_addresses` to the same address.
 
 ## Environment values
 
@@ -134,6 +134,15 @@ Do not commit real values.
 
 Email delivery configuration is managed through Cloudflare Email Service / Worker bindings and Cloudflare-side domain settings rather than application source secrets where possible.
 
+Current Worker configuration:
+- `EMAIL`: Cloudflare Email Service send binding
+- `EMAIL_FROM=noreply@mail.nmtng.com`
+- `allowed_sender_addresses=["noreply@mail.nmtng.com"]`
+- Better Auth `emailVerification.sendOnSignUp=true`
+- Better Auth `emailAndPassword.requireEmailVerification=true`
+- Better Auth `emailAndPassword.sendResetPassword` sends through the same email service
+- authentication route passes Worker `waitUntil` into the email sender so delivery work can continue after the HTTP response
+
 ## Cloudflare setup
 
 Current / planned order:
@@ -144,10 +153,10 @@ Current / planned order:
 4. Set `BETTER_AUTH_SECRET` using Wrangler secrets.
 5. Deploy the Worker and verify `/health`.
 6. Configure the production `AUTH_BASE_URL`.
-7. Configure Cloudflare Email Service for the production sender domain.
-8. Add the Worker email-sending binding/configuration.
-9. Connect Better Auth email verification and password-reset callbacks to the email sender.
-10. Test sign-up -> verification email -> verified login.
+7. Configure Cloudflare Email Service for the production sender domain. ✅ `mail.nmtng.com`
+8. Add the Worker email-sending binding/configuration. ✅
+9. Connect Better Auth email verification and password-reset callbacks to the email sender. ✅
+10. Deploy the Worker and test sign-up -> verification email -> verified login.
 11. Configure Google OAuth credentials and callback URLs.
 12. Configure Sign in with Apple credentials and callback URLs.
 13. Switch mobile from `mock` to `remote`.
