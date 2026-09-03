@@ -1,6 +1,6 @@
 # Calendar App Architecture
 
-Last updated: 2026-09-01
+Last updated: 2026-09-03
 
 ## 1. Architecture overview
 
@@ -27,6 +27,7 @@ Cloudflare Workers API
 Cloudflare D1
 
 Additional services:
+- Cloudflare Email Service: verification, password reset, invitations, and account/security transactional mail
 - Cloudflare R2: future attachments/images
 - Cloudflare Queues: future asynchronous jobs
 - Apple Push Notification Service / Firebase Cloud Messaging: push notifications
@@ -150,6 +151,12 @@ Initial providers:
 - Google
 - Apple
 - email/password
+
+Transactional email:
+- Cloudflare Email Service is the selected delivery provider.
+- Better Auth generates and validates verification/reset flows.
+- The Worker sends verification, password-reset, email-change, invitation, and account/security mail.
+- Email/password accounts should require email verification in production.
 
 Session validation occurs on the backend for protected requests.
 
@@ -501,7 +508,8 @@ Backend:
 - D1 binding passed directly to Better Auth
 - Hono route mounts Better Auth under `/api/auth/*`
 - authenticated `/api/me` example endpoint
+- Cloudflare Email Service selected for transactional email delivery
 
-Cloudflare account resources, D1 binding, OAuth credentials, and production secrets remain deployment-time configuration.
+Cloudflare D1 and Worker deployment are configured. OAuth credentials and production email-domain/sender configuration remain deployment-time configuration.
 
 See `docs/authentication.md`.
