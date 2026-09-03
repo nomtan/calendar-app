@@ -1,6 +1,6 @@
 # Authentication
 
-Last updated: 2026-09-01
+Last updated: 2026-09-03
 
 ## Goal
 
@@ -71,6 +71,46 @@ Database:
 - Cloudflare D1
 - Better Auth built-in D1 support
 
+## Email delivery
+
+Transactional email is handled by **Cloudflare Email Service** from the Cloudflare Worker.
+
+Better Auth owns the authentication flow and token/URL generation. Cloudflare Email Service performs the actual delivery.
+
+Initial email use cases:
+- email verification after account registration
+- password reset
+- email-address change verification
+- shared-calendar invitation email
+- security/account notifications where required
+
+Expected sign-up flow:
+
+```
+Expo
+  -> Cloudflare Worker
+  -> Better Auth creates verification token / URL
+  -> Cloudflare Email Service sends verification email
+  -> user opens verification URL
+  -> Better Auth verifies token
+  -> email address is marked verified
+```
+
+Policy:
+- enable email verification for email/password sign-up
+- do not allow production email/password accounts to remain permanently unverified
+- email templates should be application-owned rather than coupled to frontend UI
+- sender addresses and domains must be configured outside source control
+- delivery failures must not expose secrets or raw provider errors to clients
+
+Planned sender example:
+
+```
+noreply@<application-domain>
+```
+
+Do not hard-code the final sender domain until the production domain is decided.
+
 ## Environment values
 
 Worker public variables:
@@ -92,18 +132,27 @@ APPLE_CLIENT_SECRET
 
 Do not commit real values.
 
-## Cloudflare setup to do later
+Email delivery configuration is managed through Cloudflare Email Service / Worker bindings and Cloudflare-side domain settings rather than application source secrets where possible.
+
+## Cloudflare setup
+
+Current / planned order:
 
 1. Create D1 database.
-2. Add the D1 binding as `DB` in wrangler configuration.
+2. Add the D1 binding as `DB` in Wrangler configuration.
 3. Generate/apply the Better Auth schema against D1.
 4. Set `BETTER_AUTH_SECRET` using Wrangler secrets.
-5. Configure Google OAuth credentials and callback URLs.
-6. Configure Sign in with Apple credentials and callback URLs.
-7. Set the production API URL as `AUTH_BASE_URL`.
-8. Switch mobile from `mock` to `remote`.
-9. Test session persistence on iOS and Android.
-10. Test logout and account deletion flow.
+5. Deploy the Worker and verify `/health`.
+6. Configure the production `AUTH_BASE_URL`.
+7. Configure Cloudflare Email Service for the production sender domain.
+8. Add the Worker email-sending binding/configuration.
+9. Connect Better Auth email verification and password-reset callbacks to the email sender.
+10. Test sign-up -> verification email -> verified login.
+11. Configure Google OAuth credentials and callback URLs.
+12. Configure Sign in with Apple credentials and callback URLs.
+13. Switch mobile from `mock` to `remote`.
+14. Test session persistence on iOS and Android.
+15. Test logout and account deletion flow.
 
 ## Database migration policy
 
@@ -121,3 +170,5 @@ Application-specific tables such as calendars and events will be managed separat
 - never accept actor user IDs from client request bodies for authorization.
 - development-only Expo origins must not be trusted in production.
 - production deep-link origins should be explicitly limited.
+- verification and password-reset URLs must be single-purpose and expire.
+- never log verification tokens, password-reset tokens, or provider secrets.
