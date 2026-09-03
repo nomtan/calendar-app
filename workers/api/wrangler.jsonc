@@ -18,5 +18,14 @@
 			"database_id": "2c0cc099-67f1-4675-bfbe-7665875726b3",
       "remote": true
 		}
+	],
+	"send_email": [
+	{
+		"name": "EMAIL",
+		"remote": true,
+		"allowed_sender_addresses": [
+			"noreply@mail.nmtng.com"
+		]
+	}
 	]
 }
