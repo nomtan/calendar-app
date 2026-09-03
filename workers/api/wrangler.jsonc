@@ -8,24 +8,24 @@
 	],
 	"vars": {
 		"AUTH_BASE_URL": "https://calendar-app-api.nomura-ac.workers.dev",
-		"APP_ORIGIN": "http://localhost:8081"
+		"APP_ORIGIN": "http://localhost:8081",
+		"EMAIL_FROM": "noreply@mail.nmtng.com"
 	},
-	// D1 binding will be added later:
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "calendar-app",
 			"database_id": "2c0cc099-67f1-4675-bfbe-7665875726b3",
-      "remote": true
+			"remote": true
 		}
 	],
 	"send_email": [
-	{
-		"name": "EMAIL",
-		"remote": true,
-		"allowed_sender_addresses": [
-			"noreply@mail.nmtng.com"
-		]
-	}
+		{
+			"name": "EMAIL",
+			"remote": true,
+			"allowed_sender_addresses": [
+				"noreply@mail.nmtng.com"
+			]
+		}
 	]
 }
