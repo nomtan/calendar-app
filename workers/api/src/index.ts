@@ -8,7 +8,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.get('/health', (c) => c.json({ ok: true }));
 
 app.on(['GET', 'POST'], '/api/auth/*', async (c) => {
-  const auth = createAuth(c.env);
+  const auth = createAuth(c.env, (promise) => c.executionCtx.waitUntil(promise));
   return auth.handler(c.req.raw);
 });
 
