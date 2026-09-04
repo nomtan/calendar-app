@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'heroui-native';
 
 import { useCalendars } from '@/features/calendars/calendars-context';
@@ -35,46 +35,83 @@ export function MonthCalendar() {
   const openNew = (date: string) => setEditor({ visible: true, date, event: null });
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="flex-row items-center justify-between px-4 pb-3 pt-3">
-        <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary"><Text className="text-xl text-foreground">≡</Text></Pressable>
-        <View className="flex-row items-center gap-2">
-          <Pressable onPress={() => setMonth(new Date(year, monthIndex - 1, 1))} className="px-2 py-2"><Text className="text-lg text-muted-foreground">‹</Text></Pressable>
-          <Pressable onPress={() => { const now = new Date(); setMonth(new Date(now.getFullYear(), now.getMonth(), 1)); }}><View className="items-center"><Text className="text-lg font-semibold text-foreground">{year}年{monthIndex + 1}月</Text><Text className="text-[10px] text-muted-foreground">{selectedCalendar.emoji} {selectedCalendar.name}</Text></View></Pressable>
-          <Pressable onPress={() => setMonth(new Date(year, monthIndex + 1, 1))} className="px-2 py-2"><Text className="text-lg text-muted-foreground">›</Text></Pressable>
+    <View style={styles.root}>
+      <View style={styles.header}>
+        <Pressable style={styles.headerIconButton}>
+          <Text style={styles.headerIconText}>≡</Text>
+        </Pressable>
+
+        <View style={styles.monthNavigation}>
+          <Pressable onPress={() => setMonth(new Date(year, monthIndex - 1, 1))} style={styles.monthArrowButton}>
+            <Text style={styles.monthArrow}>‹</Text>
+          </Pressable>
+
+          <Pressable onPress={() => { const now = new Date(); setMonth(new Date(now.getFullYear(), now.getMonth(), 1)); }}>
+            <View style={styles.monthTitleWrap}>
+              <Text style={styles.monthTitle}>{year}年{monthIndex + 1}月</Text>
+              <Text style={styles.calendarName}>{selectedCalendar.emoji} {selectedCalendar.name}</Text>
+            </View>
+          </Pressable>
+
+          <Pressable onPress={() => setMonth(new Date(year, monthIndex + 1, 1))} style={styles.monthArrowButton}>
+            <Text style={styles.monthArrow}>›</Text>
+          </Pressable>
         </View>
-        <Pressable className="h-10 w-10 items-center justify-center rounded-full bg-surface-secondary" onPress={() => { const now = new Date(); openNew(now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())); }}><Text className="text-2xl text-accent">＋</Text></Pressable>
+
+        <Pressable
+          style={styles.headerIconButton}
+          onPress={() => {
+            const now = new Date();
+            openNew(now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()));
+          }}
+        >
+          <Text style={styles.addText}>＋</Text>
+        </Pressable>
       </View>
 
-      <View className="flex-row border-b border-border">
+      <View style={styles.weekdayRow}>
         {weekdays.map((label, index) => (
-          <View key={label} className="flex-1 items-center py-2">
-            <Text className={index === 0 ? 'text-xs font-semibold text-danger' : index === 6 ? 'text-xs font-semibold text-accent' : 'text-xs font-semibold text-muted-foreground'}>{label}</Text>
+          <View key={label} style={styles.weekdayCell}>
+            <Text style={[styles.weekdayText, index === 0 && styles.sundayText, index === 6 && styles.saturdayText]}>{label}</Text>
           </View>
         ))}
       </View>
 
-      <View className="flex-1">
+      <View style={styles.calendarGrid}>
         {Array.from({ length: 6 }, (_, week) => (
-          <View key={week} className="flex-1 flex-row">
+          <View key={week} style={styles.weekRow}>
             {cells.slice(week * 7, week * 7 + 7).map((day, column) => {
               const key = day ? dateKey(day) : 'blank-' + week + '-' + column;
-              const dayEvents = day ? events.filter((event) => event.calendarId === selectedCalendarId && occursOnDate(event, dateKey(day))) : [];
+              const dayEvents = day
+                ? events.filter((event) => event.calendarId === selectedCalendarId && occursOnDate(event, dateKey(day)))
+                : [];
+
               return (
-                <Pressable key={key} disabled={!day} onPress={() => day && openNew(dateKey(day))} className="flex-1 border-b border-r border-border/70 bg-background px-1 pb-1 pt-1">
+                <Pressable
+                  key={key}
+                  disabled={!day}
+                  onPress={() => day && openNew(dateKey(day))}
+                  style={styles.dayCell}
+                >
                   {day ? (
                     <>
-                      <Text className={column === 0 ? 'mb-1 text-xs font-medium text-danger' : column === 6 ? 'mb-1 text-xs font-medium text-accent' : 'mb-1 text-xs font-medium text-foreground'}>{day}</Text>
-                      <View className="gap-0.5">
+                      <Text style={[styles.dayNumber, column === 0 && styles.sundayText, column === 6 && styles.saturdayText]}>{day}</Text>
+                      <View style={styles.eventList}>
                         {dayEvents.slice(0, 4).map((event) => {
                           const style = eventStyle[event.color];
                           return (
-                            <Pressable key={event.id} onPress={() => setEditor({ visible: true, date: event.date, event })} style={{ backgroundColor: style.backgroundColor, borderRadius: 4, paddingHorizontal: 3, paddingVertical: 2 }}>
-                              <Text numberOfLines={1} ellipsizeMode="tail" style={{ color: style.color, fontSize: 9, fontWeight: '600' }}>{event.status === 'tentative' ? '△ ' : event.status === 'undecided' ? '? ' : ''}{event.title}</Text>
+                            <Pressable
+                              key={event.id}
+                              onPress={() => setEditor({ visible: true, date: event.date, event })}
+                              style={[styles.eventChip, { backgroundColor: style.backgroundColor }]}
+                            >
+                              <Text numberOfLines={1} ellipsizeMode="tail" style={[styles.eventText, { color: style.color }]}>
+                                {event.status === 'tentative' ? '△ ' : event.status === 'undecided' ? '? ' : ''}{event.title}
+                              </Text>
                             </Pressable>
                           );
                         })}
-                        {dayEvents.length > 4 ? <Text className="text-[9px] text-muted-foreground">+{dayEvents.length - 4}</Text> : null}
+                        {dayEvents.length > 4 ? <Text style={styles.moreEvents}>+{dayEvents.length - 4}</Text> : null}
                       </View>
                     </>
                   ) : null}
@@ -85,11 +122,167 @@ export function MonthCalendar() {
         ))}
       </View>
 
-      <View className="absolute bottom-4 right-4">
-        <Button isIconOnly accessibilityLabel="予定を追加" className="h-14 w-14 rounded-full" onPress={() => { const now = new Date(); openNew(now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate())); }}><Text className="text-2xl text-white">＋</Text></Button>
+      <View style={styles.floatingButton}>
+        <Button
+          isIconOnly
+          accessibilityLabel="予定を追加"
+          className="h-14 w-14 rounded-full"
+          onPress={() => {
+            const now = new Date();
+            openNew(now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate()));
+          }}
+        >
+          <Text style={styles.floatingButtonText}>＋</Text>
+        </Button>
       </View>
 
-      <EventEditorModal visible={editor.visible} date={editor.date} event={editor.event} onClose={() => setEditor((current) => ({ ...current, visible: false, event: null }))} />
+      <EventEditorModal
+        visible={editor.visible}
+        date={editor.date}
+        event={editor.event}
+        onClose={() => setEditor((current) => ({ ...current, visible: false, event: null }))}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  header: {
+    minHeight: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 10,
+  },
+  headerIconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F5F5F7',
+  },
+  headerIconText: {
+    fontSize: 20,
+    color: '#202124',
+  },
+  addText: {
+    fontSize: 26,
+    lineHeight: 28,
+    color: '#6D4AE3',
+  },
+  monthNavigation: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  monthArrowButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  monthArrow: {
+    fontSize: 22,
+    color: '#8A8A98',
+  },
+  monthTitleWrap: {
+    minWidth: 124,
+    alignItems: 'center',
+  },
+  monthTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: '700',
+    color: '#202124',
+  },
+  calendarName: {
+    marginTop: 1,
+    fontSize: 10,
+    lineHeight: 14,
+    color: '#8A8A98',
+  },
+  weekdayRow: {
+    height: 34,
+    flexDirection: 'row',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E7E7EC',
+  },
+  weekdayCell: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weekdayText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#777784',
+  },
+  calendarGrid: {
+    flex: 1,
+    minHeight: 1,
+  },
+  weekRow: {
+    flex: 1,
+    minHeight: 1,
+    flexDirection: 'row',
+  },
+  dayCell: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 1,
+    paddingHorizontal: 4,
+    paddingTop: 5,
+    paddingBottom: 4,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E7E7EC',
+    backgroundColor: '#FFFFFF',
+  },
+  dayNumber: {
+    marginBottom: 4,
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '500',
+    color: '#202124',
+  },
+  sundayText: {
+    color: '#D84A62',
+  },
+  saturdayText: {
+    color: '#5B73D8',
+  },
+  eventList: {
+    gap: 2,
+  },
+  eventChip: {
+    minHeight: 17,
+    borderRadius: 4,
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+  },
+  eventText: {
+    fontSize: 9,
+    lineHeight: 12,
+    fontWeight: '600',
+  },
+  moreEvents: {
+    fontSize: 9,
+    lineHeight: 12,
+    color: '#8A8A98',
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+  },
+  floatingButtonText: {
+    fontSize: 24,
+    lineHeight: 26,
+    color: '#FFFFFF',
+  },
+});
